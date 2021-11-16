@@ -73,8 +73,7 @@ class IosSpecialParameter {
 class FlutterNordicDfu {
   static const String kNamespace = 'com.timeyaa.flutter_nordic_dfu';
 
-  static const MethodChannel _channel =
-       MethodChannel('$kNamespace/method');
+  static const MethodChannel _channel = MethodChannel('$kNamespace/method');
 
   /// Start dfu handle
   /// [address] android: mac address iOS: device uuid
@@ -86,6 +85,7 @@ class FlutterNordicDfu {
   /// [enableUnsafeExperimentalButtonlessServiceInSecureDfu] see in nordic library, default is false
   /// [androidSpecialParameter] this parameters is only used by android lib
   /// [iosSpecialParameter] this parameters is only used by ios lib
+  /// [prepareDataObjectDelay] 單位為Milliseconds
   static Future<String> startDfu(
     String address,
     String filePath, {
@@ -99,8 +99,8 @@ class FlutterNordicDfu {
     AndroidSpecialParameter androidSpecialParameter =
         const AndroidSpecialParameter(),
     IosSpecialParameter iosSpecialParameter = const IosSpecialParameter(),
+    int? prepareDataObjectDelay,
   }) async {
-
     _channel.setMethodCallHandler((MethodCall call) async {
       switch (call.method) {
         case "onDeviceConnected":
@@ -175,6 +175,7 @@ class FlutterNordicDfu {
           androidSpecialParameter.startAsForegroundService,
       'alternativeAdvertisingNameEnabled':
           iosSpecialParameter.alternativeAdvertisingNameEnabled,
+      'prepareDataObjectDelay': prepareDataObjectDelay,
     });
   }
 
@@ -245,8 +246,13 @@ class DefaultDfuProgressListenerAdapter extends DfuProgressListenerAdapter {
   void Function(String deviceAddress, int error, int errorType, String message)?
       onErrorHandle;
 
-  void Function(String deviceAddress, int percent, double speed,
-      double avgSpeed, int currentPart, int partsTotal)? onProgressChangedHandle;
+  void Function(
+      String deviceAddress,
+      int percent,
+      double speed,
+      double avgSpeed,
+      int currentPart,
+      int partsTotal)? onProgressChangedHandle;
 
   DefaultDfuProgressListenerAdapter({
     this.onDeviceConnectedHandle,

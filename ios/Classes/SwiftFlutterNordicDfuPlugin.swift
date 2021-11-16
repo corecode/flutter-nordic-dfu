@@ -58,6 +58,7 @@ public class SwiftFlutterNordicDfuPlugin: NSObject, FlutterPlugin, DFUServiceDel
             let numberOfPackets = (arguments["numberOfPackets"] as? UInt16)
 
             let enablePRNs = (arguments["enablePRNs"] as? Bool) ?? false
+            let dataObjectPreparationDelay = (arguments["prepareDataObjectDelay"] as? Int)
             
             startDfu(address,
                      name: name,
@@ -68,6 +69,7 @@ public class SwiftFlutterNordicDfuPlugin: NSObject, FlutterPlugin, DFUServiceDel
                      forceScanningForNewAddressInLegacyDfu: forceScanningForNewAddressInLegacyDfu,
                      enableUnsafeExperimentalButtonlessServiceInSecureDfu: enableUnsafeExperimentalButtonlessServiceInSecureDfu,
                      alternativeAdvertisingNameEnabled: alternativeAdvertisingNameEnabled,
+                     dataObjectPreparationDelay: dataObjectPreparationDelay,
                      result: result)
         } else if (call.method == "abortDfu") {
             _ = dfuController?.abort()
@@ -85,6 +87,7 @@ public class SwiftFlutterNordicDfuPlugin: NSObject, FlutterPlugin, DFUServiceDel
         forceScanningForNewAddressInLegacyDfu: Bool,
         enableUnsafeExperimentalButtonlessServiceInSecureDfu: Bool?,
         alternativeAdvertisingNameEnabled: Bool?,
+        dataObjectPreparationDelay: Int?,
         result: @escaping FlutterResult) {
         guard let uuid = UUID(uuidString: address) else {
             result(FlutterError(code: "DEVICE_ADDRESS_ERROR", message: "Device address conver to uuid failed", details: "Device uuid \(address) convert to uuid failed"))
@@ -119,6 +122,11 @@ public class SwiftFlutterNordicDfuPlugin: NSObject, FlutterPlugin, DFUServiceDel
         }
 
         dfuInitiator.forceScanningForNewAddressInLegacyDfu = forceScanningForNewAddressInLegacyDfu
+        if let dataObjectPreparationDelay = dataObjectPreparationDelay {
+            /// iOS單位為秒，但是傳入的單位為Milliseconds
+            dfuInitiator.dataObjectPreparationDelay = 0.001 * Double(dataObjectPreparationDelay)
+        }
+        
         
         pendingResult = result
         deviceAddress = address

@@ -138,6 +138,7 @@ public class FlutterNordicDfuPlugin implements MethodCallHandler, FlutterPlugin,
             Boolean startAsForegroundService = call.argument("startAsForegroundService");
             Integer numberOfPackets = call.argument("numberOfPackets");
             Boolean enablePRNs = call.argument("enablePRNs");
+            Integer prepareDataObjectDelay = call.argument("prepareDataObjectDelay");
 
             if (fileInAsset == null) {
                 fileInAsset = false;
@@ -164,7 +165,7 @@ public class FlutterNordicDfuPlugin implements MethodCallHandler, FlutterPlugin,
             }
 
             pendingResult = result;
-            startDfu(address, name, filePath, forceDfu, enableUnsafeExperimentalButtonlessServiceInSecureDfu, disableNotification, keepBond, packetReceiptNotificationsEnabled, restoreBond, startAsForegroundService, result, numberOfPackets, enablePRNs);
+            startDfu(address, name, filePath, forceDfu, enableUnsafeExperimentalButtonlessServiceInSecureDfu, disableNotification, keepBond, packetReceiptNotificationsEnabled, restoreBond, startAsForegroundService, result, numberOfPackets, enablePRNs, prepareDataObjectDelay);
         } else if (call.method.equals("abortDfu")) {
             if (controller != null) {
                 controller.abort();
@@ -177,7 +178,7 @@ public class FlutterNordicDfuPlugin implements MethodCallHandler, FlutterPlugin,
     /**
      * Start Dfu
      */
-    private void startDfu(String address, @Nullable String name, String filePath, Boolean forceDfu, Boolean enableUnsafeExperimentalButtonlessServiceInSecureDfu, Boolean disableNotification, Boolean keepBond, Boolean packetReceiptNotificationsEnabled, Boolean restoreBond, Boolean startAsForegroundService, Result result, Integer numberOfPackets, Boolean enablePRNs) {
+    private void startDfu(String address, @Nullable String name, String filePath, Boolean forceDfu, Boolean enableUnsafeExperimentalButtonlessServiceInSecureDfu, Boolean disableNotification, Boolean keepBond, Boolean packetReceiptNotificationsEnabled, Boolean restoreBond, Boolean startAsForegroundService, Result result, Integer numberOfPackets, Boolean enablePRNs, @Nullable Integer prepareDataObjectDelay) {
 
         DfuServiceInitiator starter = new DfuServiceInitiator(address)
                 .setZip(filePath)
@@ -185,7 +186,7 @@ public class FlutterNordicDfuPlugin implements MethodCallHandler, FlutterPlugin,
                 .setForceDfu(forceDfu == null ? false : forceDfu)
                 .setPacketsReceiptNotificationsEnabled(enablePRNs == null ? Build.VERSION.SDK_INT < Build.VERSION_CODES.M : enablePRNs)
                 .setPacketsReceiptNotificationsValue(numberOfPackets == null ? 0 : numberOfPackets)
-                .setPrepareDataObjectDelay(400)
+                .setPrepareDataObjectDelay(prepareDataObjectDelay == null ? 0 : prepareDataObjectDelay)
                 .setUnsafeExperimentalButtonlessServiceInSecureDfuEnabled(true);
         if (name != null) {
             starter.setDeviceName(name);
@@ -351,4 +352,3 @@ public class FlutterNordicDfuPlugin implements MethodCallHandler, FlutterPlugin,
         }, 200);
     }
 }
-
